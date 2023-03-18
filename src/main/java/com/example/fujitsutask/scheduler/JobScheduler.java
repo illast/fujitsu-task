@@ -3,6 +3,8 @@ package com.example.fujitsutask.scheduler;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.example.fujitsutask.dto.StationDto;
+import com.example.fujitsutask.service.StationService;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,7 +21,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobScheduler {
 
-    @Scheduled(fixedDelay = 1000 * 60 * 10)
+    private final StationService stationService;
+
+    @Scheduled(fixedDelay = 1000 * 60 * 60)
     public void getObservations() {
 
         String url = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php";
@@ -34,8 +38,10 @@ public class JobScheduler {
             Document document = builder.parse(inputStream);
 
             Element observations = document.getDocumentElement();
-            NodeList nodeList = observations.getElementsByTagName("station");
+            Long timestamp = Long.parseLong(observations.getAttribute("timestamp"));
+            System.out.println("Timestamp: " + timestamp);
 
+            NodeList nodeList = observations.getElementsByTagName("station");
             for (int i = 0; i < nodeList.getLength(); i++) {
 
                 Element station = (Element) nodeList.item(i);
@@ -43,21 +49,41 @@ public class JobScheduler {
                 String name = station.getElementsByTagName("name").item(0).getTextContent();
                 if (name.equals("Tallinn-Harku") || name.equals("Tartu-Tõravere") || name.equals("Pärnu") ) {
 
-                    String wmocode = station.getElementsByTagName("wmocode").item(0).getTextContent();
+                    Integer wmocode = parseInteger(station.getElementsByTagName("wmocode").item(0).getTextContent());
+                    Double airtemperature = parseDouble(station.getElementsByTagName("airtemperature").item(0).getTextContent());
+                    Double windspeed = parseDouble(station.getElementsByTagName("windspeed").item(0).getTextContent());
                     String phenomenon = station.getElementsByTagName("phenomenon").item(0).getTextContent();
-                    String airtemperature = station.getElementsByTagName("airtemperature").item(0).getTextContent();
-                    String windspeed = station.getElementsByTagName("windspeed").item(0).getTextContent();
 
+                    StationDto stationDto = StationDto.builder()
+                            .name(name)
+                            .wmocode(wmocode)
+                            .airtemperature(airtemperature)
+                            .windspeed(windspeed)
+                            .phenomenon(phenomenon)
+                            .timestamp(timestamp).build();
+
+                    stationService.addStation(stationDto);
+
+                    System.out.println("-----");
                     System.out.println("Name: " + name);
                     System.out.println("WMO code: " + wmocode);
                     System.out.println("Air temperature: " + airtemperature);
                     System.out.println("Wind speed: " + windspeed);
                     System.out.println("Weather phenomenon: " + phenomenon);
-                    System.out.println("-----");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static Integer parseInteger(String s) {
+        if (s == null || s.isEmpty()) return null;
+        return Integer.parseInt(s);
+    }
+
+    private static Double parseDouble(String s) {
+        if (s == null || s.isEmpty()) return null;
+        return Double.parseDouble(s);
     }
 }

@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS station (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(250) NOT NULL,
+    wmocode INT DEFAULT NULL,
+    airtemperature DOUBLE DEFAULT NULL,
+    windspeed DOUBLE DEFAULT NULL,
+    phenomenon VARCHAR(250) DEFAULT NULL,
+    timestamp LONG DEFAULT NULL
+);
