@@ -4,8 +4,6 @@ import com.example.fujitsutask.dto.StationDto;
 import com.example.fujitsutask.service.StationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,8 +19,8 @@ public class StationController {
         return stationService.getStations();
     }
 
-    @PostMapping("/api/stations")
-    public void addStation(@RequestBody StationDto station) {
-        stationService.addStation(station);
+    @GetMapping("/api")
+    public float calculateFee(String city, String vehicle) {
+        return stationService.calculateFee(city, vehicle);
     }
 }
