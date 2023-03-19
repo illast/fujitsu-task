@@ -5,6 +5,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.example.fujitsutask.dto.StationDto;
 import com.example.fujitsutask.service.StationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @EnableScheduling
 @RequiredArgsConstructor
 @Component
@@ -47,7 +49,7 @@ public class JobScheduler {
             // Get the root element of the XML document and its timestamp
             Element observations = document.getDocumentElement();
             Long timestamp = Long.parseLong(observations.getAttribute("timestamp"));
-            System.out.println("Timestamp: " + timestamp);
+            log.info("Timestamp: {}", timestamp);
 
             // Get a list of stations only the ones we need
             NodeList nodeList = observations.getElementsByTagName("station");
@@ -57,28 +59,22 @@ public class JobScheduler {
                 if (name.equals("Tallinn-Harku") || name.equals("Tartu-Tõravere") || name.equals("Pärnu") ) {
 
                     // Get station weather data and create DTO object
-                    Integer wmocode = parseInteger(station.getElementsByTagName("wmocode").item(0).getTextContent());
-                    Double airtemperature = parseDouble(station.getElementsByTagName("airtemperature").item(0).getTextContent());
-                    Double windspeed = parseDouble(station.getElementsByTagName("windspeed").item(0).getTextContent());
+                    Integer wmoCode = parseInteger(station.getElementsByTagName("wmocode").item(0).getTextContent());
+                    Double airTemperature = parseDouble(station.getElementsByTagName("airtemperature").item(0).getTextContent());
+                    Double windSpeed = parseDouble(station.getElementsByTagName("windspeed").item(0).getTextContent());
                     String phenomenon = station.getElementsByTagName("phenomenon").item(0).getTextContent();
 
                     StationDto stationDto = StationDto.builder()
                             .name(name)
-                            .wmocode(wmocode)
-                            .airtemperature(airtemperature)
-                            .windspeed(windspeed)
+                            .wmoCode(wmoCode)
+                            .airTemperature(airTemperature)
+                            .windSpeed(windSpeed)
                             .phenomenon(phenomenon)
                             .timestamp(timestamp).build();
 
                     // Save the weather data to the database
                     stationService.addStation(stationDto);
-
-                    System.out.println("-----");
-                    System.out.println("Name: " + name);
-                    System.out.println("WMO code: " + wmocode);
-                    System.out.println("Air temperature: " + airtemperature);
-                    System.out.println("Wind speed: " + windspeed);
-                    System.out.println("Weather phenomenon: " + phenomenon);
+                    log.info("Saved station {}", stationDto);
                 }
             }
         } catch (Exception e) {

@@ -9,9 +9,9 @@ public class StationDto {
 
     private Integer id;
     private String name;
-    private Integer wmocode;
-    private Double airtemperature;
-    private Double windspeed;
+    private Integer wmoCode;
+    private Double airTemperature;
+    private Double windSpeed;
     private String phenomenon;
     private Long timestamp;
 }

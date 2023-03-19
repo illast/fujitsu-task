@@ -6,12 +6,14 @@ import com.example.fujitsutask.mapper.StationMapper;
 import com.example.fujitsutask.model.Station;
 import com.example.fujitsutask.repository.StationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class StationService {
@@ -29,7 +31,6 @@ public class StationService {
     private static final float WSEF_FEE = 1f;
     private static final float WPEF_RAIN_FEE = 1f;
     private static final float WPEF_SNOW_FEE = 0.5f;
-
 
     static {
         RBF.put("Tallinn Car", 4f);
@@ -64,7 +65,6 @@ public class StationService {
         WPEF_FORBIDDEN.add("Hail");
         WPEF_FORBIDDEN.add("Thunder");
         WPEF_FORBIDDEN.add("Thunderstorm");
-
     }
 
     /**
@@ -84,6 +84,7 @@ public class StationService {
     }
 
     /**
+     * Calculate delivery fee.
      * Delivery fee = RBF + ATEF + WSEF + WPEF
      * RBF - regional base fee;
      * ATEF - air temperature extra fee;
@@ -98,18 +99,13 @@ public class StationService {
 
         if (vehicle.equals("Scooter") || vehicle.equals("Bike")) {
             Station station = stationRepository.findTopByNameContainingIgnoreCaseOrderByIdDesc(city);
+            log.info("Found station {}", station);
 
-            System.out.println("ID: " + station.getId());
-            System.out.println("Name: " + station.getName());
-            System.out.println("Air temperature: " + station.getAirtemperature());
-            System.out.println("Wind speed: " + station.getWindspeed());
-            System.out.println("Weather phenomenon: " + station.getPhenomenon());
-
-            fee += calculateATEF(station.getAirtemperature())
+            fee += calculateATEF(station.getAirTemperature())
                     + calculateWPEF(station.getPhenomenon());
 
             if (vehicle.equals("Bike")) {
-                fee += calculateWSEF(station.getWindspeed());
+                fee += calculateWSEF(station.getWindSpeed());
             }
         }
 
@@ -127,18 +123,18 @@ public class StationService {
     /**
      * Return ATEF based on air temperature.
      */
-    private float calculateATEF(Double airtemperature) {
-        if (airtemperature < -10) return ATEF_LOW_TEMP_FEE;
-        if (airtemperature >= -10 && airtemperature < 0) return ATEF_MID_TEMP_FEE;
+    private float calculateATEF(Double airTemperature) {
+        if (airTemperature < -10) return ATEF_LOW_TEMP_FEE;
+        if (airTemperature >= -10 && airTemperature < 0) return ATEF_MID_TEMP_FEE;
         return 0;
     }
 
     /**
      * Return WSEF based on wind speed.
      */
-    private float calculateWSEF(Double windspeed) {
-        if (windspeed >= 10 && windspeed < 20) return WSEF_FEE;
-        if (windspeed >= 20) throw new ApplicationException("Usage of selected vehicle type is forbidden");
+    private float calculateWSEF(Double windSpeed) {
+        if (windSpeed >= 10 && windSpeed < 20) return WSEF_FEE;
+        if (windSpeed >= 20) throw new ApplicationException("Usage of selected vehicle type is forbidden");
         return 0;
     }
 

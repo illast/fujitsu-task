@@ -29,10 +29,22 @@ public class Station {
     @Basic(optional = false)
     @Column(name = "id", unique = true, nullable = false)
     private Integer id;
+
+    @Column(name = "name")
     private String name;
-    private Integer wmocode;
-    private Double airtemperature;
-    private Double windspeed;
+
+    @Column(name = "wmocode")
+    private Integer wmoCode;
+
+    @Column(name = "airtemperature")
+    private Double airTemperature;
+
+    @Column(name = "windspeed")
+    private Double windSpeed;
+
+    @Column(name = "phenomenon")
     private String phenomenon;
+
+    @Column(name = "timestamp")
     private Long timestamp;
 }
