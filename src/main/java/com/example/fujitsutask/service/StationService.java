@@ -1,6 +1,7 @@
 package com.example.fujitsutask.service;
 
 import com.example.fujitsutask.dto.StationDto;
+import com.example.fujitsutask.exception.ApplicationException;
 import com.example.fujitsutask.mapper.StationMapper;
 import com.example.fujitsutask.model.Station;
 import com.example.fujitsutask.repository.StationRepository;
@@ -137,7 +138,7 @@ public class StationService {
      */
     private float calculateWSEF(Double windspeed) {
         if (windspeed >= 10 && windspeed < 20) return WSEF_FEE;
-        if (windspeed >= 20) return -1; // TODO "Usage of selected vehicle type is forbidden" error message
+        if (windspeed >= 20) throw new ApplicationException("Usage of selected vehicle type is forbidden");
         return 0;
     }
 
@@ -147,7 +148,7 @@ public class StationService {
     private float calculateWPEF(String phenomenon) {
         if (WPEF_SNOW.contains(phenomenon)) return WPEF_SNOW_FEE;
         if (WPEF_RAIN.contains(phenomenon)) return WPEF_RAIN_FEE;
-        if (WPEF_FORBIDDEN.contains(phenomenon)) return -1; // TODO "Usage of selected vehicle type is forbidden" error message
+        if (WPEF_FORBIDDEN.contains(phenomenon)) throw new ApplicationException("Usage of selected vehicle type is forbidden");
         return 0;
     }
 }
