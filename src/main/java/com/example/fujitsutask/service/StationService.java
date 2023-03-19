@@ -80,7 +80,13 @@ public class StationService {
         float fee = calculateRBF(city, vehicle);
 
         if (vehicle.equals("Scooter") || vehicle.equals("Bike")) {
-            Station station = stationRepository.findTopByNameOrderByIdDesc(city);
+            Station station = stationRepository.findTopByNameContainingIgnoreCaseOrderByIdDesc(city);
+
+            System.out.println("ID: " + station.getId());
+            System.out.println("Name: " + station.getName());
+            System.out.println("Air temperature: " + station.getAirtemperature());
+            System.out.println("Wind speed: " + station.getWindspeed());
+            System.out.println("Weather phenomenon: " + station.getPhenomenon());
 
             fee += calculateATEF(station.getAirtemperature())
                     + calculateWPEF(station.getPhenomenon());

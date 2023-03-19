@@ -23,7 +23,7 @@ public class JobScheduler {
 
     private final StationService stationService;
 
-    @Scheduled(fixedDelay = 1000 * 60 * 60)
+    @Scheduled(cron = "0 15 * * * *")
     public void getObservations() {
 
         String url = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php";
