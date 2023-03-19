@@ -66,16 +66,32 @@ public class StationService {
 
     }
 
+    /**
+     * Return a list of all stations.
+     */
     public List<StationDto> getStations() {
         List<Station> stations = stationRepository.findAll();
         return stationMapper.toDtoList(stations);
     }
 
+    /**
+     * Save station to database.
+     */
     public void addStation(StationDto stationDto) {
         Station station = stationMapper.dtoToEntity(stationDto);
         stationRepository.save(station);
     }
 
+    /**
+     * Delivery fee = RBF + ATEF + WSEF + WPEF
+     * RBF - regional base fee;
+     * ATEF - air temperature extra fee;
+     * WSEF - wind speed extra fee;
+     * WPEF - weather phenomenon extra fee.
+     * @param city city name.
+     * @param vehicle vehicle type.
+     * @return calculated fee.
+     */
     public float calculateFee(String city, String vehicle) {
         float fee = calculateRBF(city, vehicle);
 
@@ -99,23 +115,35 @@ public class StationService {
         return fee;
     }
 
+    /**
+     * Return RBF based on city and vehicle type.
+     */
     private float calculateRBF(String city, String vehicle) {
         if (RBF.containsKey(city + " " + vehicle)) return RBF.get(city + " " + vehicle);
         return 0;
     }
 
+    /**
+     * Return ATEF based on air temperature.
+     */
     private float calculateATEF(Double airtemperature) {
         if (airtemperature < -10) return ATEF_LOW_TEMP_FEE;
         if (airtemperature >= -10 && airtemperature < 0) return ATEF_MID_TEMP_FEE;
         return 0;
     }
 
+    /**
+     * Return WSEF based on wind speed.
+     */
     private float calculateWSEF(Double windspeed) {
         if (windspeed >= 10 && windspeed < 20) return WSEF_FEE;
         if (windspeed >= 20) return -1; // TODO "Usage of selected vehicle type is forbidden" error message
         return 0;
     }
 
+    /**
+     * Return WPEF based on phenomenon.
+     */
     private float calculateWPEF(String phenomenon) {
         if (WPEF_SNOW.contains(phenomenon)) return WPEF_SNOW_FEE;
         if (WPEF_RAIN.contains(phenomenon)) return WPEF_RAIN_FEE;
